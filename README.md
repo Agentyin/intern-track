@@ -13,6 +13,16 @@ Intern Tracker is a web-based internship management system built with **Flask** 
 - Secure authentication and role-based access
 ---
 
+## 📸 Screenshots
+
+### 🔐 Login Page
+![Login Page](screenshots/login_page.png)
+
+### 📊 Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+
+
 ## ⚙️ Installation & Setup (Development)
 
 1. **Clone the repository:**
