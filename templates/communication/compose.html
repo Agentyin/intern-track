@@ -1,0 +1,46 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Compose Message{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Compose Message</h1>
+    <a href="{{ url_for('messages') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Messages
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('compose_message') }}">
+            <div class="mb-3">
+                <label class="form-label">Recipient</label>
+                <select class="form-select" name="recipient_id" required>
+                    <option value="">Select recipient</option>
+                    {% for recipient in recipients %}
+                        <option value="{{ recipient.id }}">
+                            {{ recipient.first_name }} {{ recipient.last_name }} ({{ recipient.role|capitalize }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Subject</label>
+                <input type="text" class="form-control" name="subject" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+                <textarea class="form-control" name="body" rows="8" required></textarea>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" name="is_urgent" id="isUrgent">
+                <label class="form-check-label" for="isUrgent">Mark as urgent</label>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="reset" class="btn btn-secondary">Reset</button>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

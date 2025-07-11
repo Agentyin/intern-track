@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="{{ config.ORGANIZATION_NAME }}" class="auth-logo">
+            <h2>Login to InternTrack</h2>
+            <p>Enter your credentials to access your account</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            
+            <div class="form-group form-actions">
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                <a href="{{ url_for('register') }}" class="btn btn-link">Register New Account</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

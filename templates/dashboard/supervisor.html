@@ -1,0 +1,211 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Supervisor Dashboard{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Supervisor Dashboard</h1>
+    <p class="text-muted">Overview of your interns' progress</p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h5>Assigned Interns</h5>
+                <h2>{{ intern_count }}</h2>
+                <p class="text-muted">Currently under your supervision</p>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-sm btn-outline-primary">View Interns</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h5>Pending Reports</h5>
+                <h2>{{ pending_reports }}</h2>
+                <p class="text-muted">Awaiting your review</p>
+                <a href="{{ url_for('review_reports') }}" class="btn btn-sm btn-outline-warning">Review Now</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <h5>Attendance Issues</h5>
+                <h2>{{ attendance_issues }}</h2>
+                <p class="text-muted">Late or absent records</p>
+                <a href="{{ url_for('attendance_records') }}" class="btn btn-sm btn-outline-danger">View Records</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>Intern Attendance Overview</h4>
+                <a href="{{ url_for('attendance_records') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                <canvas id="attendanceChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>Recent Reports</h4>
+                <a href="{{ url_for('review_reports') }}" class="btn btn-sm btn-primary">Manage Reports</a>
+            </div>
+            <div class="card-body">
+                {% if reviewed_reports %}
+                    <div class="list-group">
+                        {% for report in reviewed_reports %}
+                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ report.title }}</h5>
+                                <small class="text-muted">{{ report.submission_date.strftime('%b %d, %Y') }}</small>
+                            </div>
+                            <p class="mb-1">Submitted by {{ report.user.first_name }} {{ report.user.last_name }}</p>
+                            <small class="badge bg-{{ 'success' if report.status == 'approved' else 'danger' if report.status == 'declined' else 'warning' if report.status == 'reviewed' else 'info' }}">
+                                {{ report.status|capitalize }}
+                            </small>
+                            {% if report.status == 'submitted' %}
+                            <div class="mt-2">
+                                <a href="{{ url_for('review_reports') }}?report_id={{ report.id }}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i> Review
+                                </a>
+                            </div>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No reports have been reviewed yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Pending Report Approvals</h4>
+            </div>
+            <div class="card-body">
+                {% if pending_reports_list %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Intern</th>
+                                    <th>Type</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in pending_reports_list %}
+                                <tr>
+                                    <td>{{ report.title }}</td>
+                                    <td>{{ report.user.first_name }} {{ report.user.last_name }}</td>
+                                    <td>{{ report.report_type|capitalize }}</td>
+                                    <td>{{ report.submission_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('review_reports') }}?report_id={{ report.id }}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-check"></i> Approve
+                                        </a>
+                                        <a href="{{ url_for('review_reports') }}?report_id={{ report.id }}&action=decline" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times"></i> Decline
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> All reports have been reviewed!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load attendance stats for all interns
+        fetch("{{ url_for('attendance_stats') }}")
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    // Supervisor view - multiple interns
+                    const ctx = document.getElementById('attendanceChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(item => item.intern_name),
+                            datasets: [{
+                                label: 'Attendance Percentage',
+                                data: data.map(item => item.attendance_percentage),
+                                backgroundColor: '#3498db',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Percentage'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Interns'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+    });
+</script>
+{% endblock %}

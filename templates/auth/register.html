@@ -1,0 +1,65 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="{{ config.ORGANIZATION_NAME }}" class="auth-logo">
+            <h2>Create an Account</h2>
+            <p>Join {{ config.ORGANIZATION_NAME }}'s internship program</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">I am a:</label>
+                <select id="role" name="role" class="form-control">
+                    <option value="intern">Intern/Attachee</option>
+                    <option value="supervisor">Supervisor</option>
+                </select>
+            </div>
+            
+            <div class="form-group form-actions">
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                <div class="text-center mt-3">
+                    Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

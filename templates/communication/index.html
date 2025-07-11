@@ -1,0 +1,135 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Communication Center{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Communication Center</h1>
+    <a href="{{ url_for('compose_message') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> New Message
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Quick Actions</h4>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('compose_message') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-envelope"></i> Compose Message
+                    </a>
+                    <a href="{{ url_for('messages', type='inbox') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-inbox"></i> Inbox
+                        {% if unread_count > 0 %}
+                            <span class="badge bg-danger float-end">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('messages', type='sent') }}" class="btn btn-outline-info">
+                        <i class="fas fa-paper-plane"></i> Sent Messages
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Quick Contacts</h4>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for recipient in recipients|sort(attribute='first_name') %}
+                        <a href="{{ url_for('compose_message') }}?recipient_id={{ recipient.id }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ recipient.first_name }} {{ recipient.last_name }}</h6>
+                                <small class="text-muted">{{ recipient.role|capitalize }}</small>
+                            </div>
+                            <small>{{ recipient.department or 'No department' }}</small>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Recent Messages</h4>
+                    <div class="btn-group">
+                        <a href="{{ url_for('messages', type='inbox') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if received_messages %}
+                    <div class="list-group">
+                        {% for message in received_messages %}
+                        <a href="{{ url_for('view_message', message_id=message.id) }}" class="list-group-item list-group-item-action {{ 'unread' if not message.read_at else '' }}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ message.subject }}</h5>
+                                <small>{{ message.sent_at.strftime('%b %d') }}</small>
+                            </div>
+                            <p class="mb-1">From: {{ message.sender.first_name }} {{ message.sender.last_name }}</p>
+                            <small class="text-muted">{{ message.body|truncate(50) }}</small>
+                            {% if message.is_urgent %}
+                                <span class="badge bg-danger float-end">Urgent</span>
+                            {% endif %}
+                            {% if not message.read_at %}
+                                <span class="badge bg-primary float-end">New</span>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No messages in your inbox.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Sent Messages</h4>
+                    <div class="btn-group">
+                        <a href="{{ url_for('messages', type='sent') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if sent_messages %}
+                    <div class="list-group">
+                        {% for message in sent_messages %}
+                        <a href="{{ url_for('view_message', message_id=message.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ message.subject }}</h5>
+                                <small>{{ message.sent_at.strftime('%b %d') }}</small>
+                            </div>
+                            <p class="mb-1">To: {{ message.recipient.first_name }} {{ message.recipient.last_name }}</p>
+                            <small class="text-muted">{{ message.body|truncate(50) }}</small>
+                            {% if message.is_urgent %}
+                                <span class="badge bg-danger float-end">Urgent</span>
+                            {% endif %}
+                            {% if message.read_at %}
+                                <span class="badge bg-success float-end">Read</span>
+                            {% else %}
+                                <span class="badge bg-warning float-end">Unread</span>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        You haven't sent any messages yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

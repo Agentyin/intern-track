@@ -1,0 +1,33 @@
+<nav class="navbar">
+    <div class="container-fluid">
+        <button class="sidebar-toggle d-lg-none">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="navbar-brand">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo" class="navbar-logo">
+            <span class="navbar-title">{{ config.ORGANIZATION_NAME }}</span>
+        </div>
+        
+        <div class="navbar-nav">
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="d-none d-md-inline">{{ session.user_name }}</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a href="{{ url_for('dashboard') }}" class="dropdown-item">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('communication') }}" class="dropdown-item">
+                        <i class="fas fa-envelope"></i> Messages
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

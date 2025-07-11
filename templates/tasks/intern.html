@@ -1,0 +1,167 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}My Tasks{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>My Tasks</h1>
+    <div class="btn-group">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" data-filter="all">All Tasks</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="pending">Pending</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="in_progress">In Progress</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="completed">Completed</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if tasks %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="tasksTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Assigned By</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr data-status="{{ task.status }}">
+                            <td>{{ task.title }}</td>
+                            <td>{{ task.supervisor.first_name }} {{ task.supervisor.last_name }}</td>
+                            <td>
+                                {% if task.due_date %}
+                                    {{ task.due_date.strftime('%Y-%m-%d') }}
+                                    {% if task.due_date.date() < date.today() and task.status != 'completed' %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'warning' if task.status == 'pending' else 'info' if task.status == 'in_progress' else 'success' }}">
+                                    {{ task.status|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#taskModal{{ task.id }}">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#updateModal{{ task.id }}">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Task Details Modal -->
+                        <div class="modal fade" id="taskModal{{ task.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Task Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6>{{ task.title }}</h6>
+                                        <p class="text-muted">Assigned by: {{ task.supervisor.first_name }} {{ task.supervisor.last_name }}</p>
+                                        <p class="text-muted">Assigned on: {{ task.assigned_date.strftime('%Y-%m-%d') }}</p>
+                                        {% if task.due_date %}
+                                            <p class="text-muted">Due date: {{ task.due_date.strftime('%Y-%m-%d') }}</p>
+                                        {% endif %}
+                                        <hr>
+                                        <h6>Description:</h6>
+                                        <p>{{ task.description or 'No description provided' }}</p>
+                                        {% if task.completion_notes %}
+                                            <hr>
+                                            <h6>Completion Notes:</h6>
+                                            <p>{{ task.completion_notes }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Update Status Modal -->
+                        <div class="modal fade" id="updateModal{{ task.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Update Task Status</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('update_task', task_id=task.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Status</label>
+                                                <select class="form-select" name="status" required>
+                                                    <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                    <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                                    <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Completion Notes</label>
+                                                <textarea class="form-control" name="completion_notes" rows="3">{{ task.completion_notes or '' }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Update Status</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                You don't have any tasks assigned yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter functionality
+        document.querySelectorAll('[data-filter]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filter = this.getAttribute('data-filter');
+                
+                document.querySelectorAll('#tasksTable tbody tr').forEach(row => {
+                    if (filter === 'all') {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = row.getAttribute('data-status') === filter ? '' : 'none';
+                    }
+                });
+            });
+        });
+        
+        // Initialize DataTable if available
+        if (window.$ && $.fn.DataTable) {
+            $('#tasksTable').DataTable({
+                order: [[2, 'asc']]
+            });
+        }
+    });
+</script>
+{% endblock %}

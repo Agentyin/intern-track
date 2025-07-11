@@ -1,0 +1,150 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Attendance Tracking{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Attendance Tracking</h1>
+    <div class="btn-group">
+        <a href="{{ url_for('attendance_records') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-history"></i> View History
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Today's Status</h4>
+            </div>
+            <div class="card-body text-center">
+                {% if today_record %}
+                    <div class="attendance-status">
+                        <div class="status-icon bg-success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h3>Signed In</h3>
+                        <p>Time In: {{ today_record.time_in.strftime('%I:%M %p') }}</p>
+                        
+                        {% if today_record.time_out %}
+                            <p>Time Out: {{ today_record.time_out.strftime('%I:%M %p') }}</p>
+                            <p class="text-muted">You've completed your attendance for today</p>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('attendance') }}">
+                                <input type="hidden" name="action" value="sign_out">
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="attendance-status">
+                        <div class="status-icon bg-secondary">
+                            <i class="fas fa-question"></i>
+                        </div>
+                        <h3>Not Signed In</h3>
+                        <p class="text-muted">You haven't signed in today</p>
+                        <form method="POST" action="{{ url_for('attendance') }}">
+                            <input type="hidden" name="action" value="sign_in">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Sign In
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Attendance Summary</h4>
+            </div>
+            <div class="card-body">
+                <div class="attendance-stats">
+                    <div class="stat-item">
+                        <h2>{{ attendance_percentage }}%</h2>
+                        <p>Overall Attendance</p>
+                    </div>
+                    <div class="stat-item">
+                        <h2>{{ attendance_history|length }}</h2>
+                        <p>Days Recorded</p>
+                    </div>
+                </div>
+                
+                <canvas id="attendanceChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4>Recent Attendance</h4>
+    </div>
+    <div class="card-body">
+        {% if attendance_history %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time In</th>
+                            <th>Time Out</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendance_history %}
+                        <tr>
+                            <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ record.time_in.strftime('%I:%M %p') }}</td>
+                            <td>{{ record.time_out.strftime('%I:%M %p') if record.time_out else '-' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if record.status == 'present' else 'warning' if record.status == 'late' else 'danger' }}">
+                                    {{ record.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if record.time_out %}
+                                    {% set duration = record.time_out.hour * 60 + record.time_out.minute - (record.time_in.hour * 60 + record.time_in.minute) %}
+                                    {{ (duration // 60) }}h {{ (duration % 60) }}m
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No attendance records found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add form submission handlers to prevent multiple submissions
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        {% if message_type == 'inbox' %}
+            Inbox
+            <span class="badge bg-danger" id="unread-count">{{ unread_count }}</span>
+        {% else %}
+            Sent Messages
+        {% endif %}
+    </h1>
+    <a href="{{ url_for('compose_message') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> New Message
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        {% if message_type == 'inbox' %}
+                            <th>From</th>
+                        {% else %}
+                            <th>To</th>
+                        {% endif %}
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in messages %}
+                    <tr class="{{ 'unread' if message_type == 'inbox' and not message.read_at else '' }}">
+                        <td>
+                            {% if message_type == 'inbox' %}
+                                {{ message.sender.first_name }} {{ message.sender.last_name }}
+                            {% else %}
+                                {{ message.recipient.first_name }} {{ message.recipient.last_name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('view_message', message_id=message.id) }}" class="{{ 'fw-bold' if message_type == 'inbox' and not message.read_at else '' }}">
+                                {{ message.subject }}
+                                {% if message.is_urgent %}
+                                    <span class="badge bg-danger">Urgent</span>
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>{{ message.sent_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if message_type == 'inbox' %}
+                                {% if message.read_at %}
+                                    <span class="badge bg-secondary">Read</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Unread</span>
+                                {% endif %}
+                            {% else %}
+                                {% if message.read_at %}
+                                    <span class="badge bg-success">Received</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Sent</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('view_message', message_id=message.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <div class="alert alert-info mb-0">
+                                No messages found.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ report.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ report.title }}</h1>
+    <div class="btn-group">
+        {% if report.file_path %}
+            <a href="{{ url_for('download_report', report_id=report.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> Download
+            </a>
+        {% endif %}
+        {% if session.user_id == report.user_id and report.status == 'submitted' %}
+            <a href="{{ url_for('edit_report', report_id=report.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="report-meta">
+            <div class="meta-item">
+                <strong>Type:</strong> {{ report.report_type|capitalize }} Report
+            </div>
+            <div class="meta-item">
+                <strong>Submitted:</strong> {{ report.submission_date.strftime('%Y-%m-%d at %I:%M %p') }}
+            </div>
+            <div class="meta-item">
+                <strong>Status:</strong>
+                <span class="badge bg-{{ 'success' if report.status == 'approved' else 'warning' if report.status == 'reviewed' else 'info' }}">
+                    {{ report.status|capitalize }}
+                </span>
+            </div>
+            {% if report.supervisor %}
+                <div class="meta-item">
+                    <strong>Supervisor:</strong> {{ report.supervisor.first_name }} {{ report.supervisor.last_name }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Report Content</h4>
+    </div>
+    <div class="card-body">
+        {% if report.content %}
+            <div class="report-content">
+                {{ report.content|safe }}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No content provided for this report.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if report.feedback %}
+<div class="card">
+    <div class="card-header bg-{{ 'success' if report.status == 'approved' else 'warning' }}">
+        <h4 class="text-white">Supervisor Feedback</h4>
+    </div>
+    <div class="card-body">
+        <div class="feedback-content">
+            {{ report.feedback|safe }}
+        </div>
+        <div class="feedback-meta mt-3 text-muted">
+            {% if report.status != 'submitted' %}
+                Last updated: {{ report.submission_date.strftime('%Y-%m-%d at %I:%M %p') }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

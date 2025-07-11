@@ -1,0 +1,239 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Report Management{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Report Management</h1>
+        <div class="btn-group">
+            <a href="{{ url_for('reports') }}" class="btn btn-outline-primary">
+                <i class="fas fa-plus"></i> Create New Report
+            </a>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="pending-tab" data-toggle="tab" href="#pending" role="tab">
+                <i class="fas fa-clock"></i> Pending Review
+                <span class="badge bg-warning ms-2">{{ pending_reports|length }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="reviewed-tab" data-toggle="tab" href="#reviewed" role="tab">
+                <i class="fas fa-check-circle"></i> Reviewed Reports
+                <span class="badge bg-secondary ms-2">{{ reviewed_reports|length }}</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="reportTabsContent">
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            {% if pending_reports %}
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="25%">Title</th>
+                                        <th width="15%">Intern</th>
+                                        <th width="10%">Type</th>
+                                        <th width="15%">Submitted</th>
+                                        <th width="10%">Status</th>
+                                        <th width="25%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in pending_reports %}
+                                    <tr>
+                                        <td>{{ report.title }}</td>
+                                        <td>{{ report.user.first_name }} {{ report.user.last_name }}</td>
+                                        <td>{{ report.report_type|capitalize }}</td>
+                                        <td>{{ report.submission_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'primary' if report.status == 'submitted' else 'warning' }}">
+                                                {{ report.status|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('view_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-primary" 
+                                                   title="View Report">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-outline-success approve-btn" 
+                                                        data-report-id="{{ report.id }}"
+                                                        title="Approve Report">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger decline-btn" 
+                                                        data-report-id="{{ report.id }}"
+                                                        title="Decline Report">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <a href="{{ url_for('download_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-secondary" 
+                                                   title="Download Report">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    There are no reports pending your review.
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="reviewed" role="tabpanel">
+            {% if reviewed_reports %}
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="25%">Title</th>
+                                        <th width="15%">Intern</th>
+                                        <th width="10%">Type</th>
+                                        <th width="15%">Submitted</th>
+                                        <th width="10%">Status</th>
+                                        <th width="25%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in reviewed_reports %}
+                                    <tr>
+                                        <td>{{ report.title }}</td>
+                                        <td>{{ report.user.first_name }} {{ report.user.last_name }}</td>
+                                        <td>{{ report.report_type|capitalize }}</td>
+                                        <td>{{ report.submission_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if report.status == 'approved' else 'danger' }}">
+                                                {{ report.status|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('view_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-primary" 
+                                                   title="View Report">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('download_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-secondary" 
+                                                   title="Download Report">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                                {% if report.status == 'approved' %}
+                                                <a href="#" class="btn btn-outline-success disabled" title="Approved">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                {% else %}
+                                                <button type="button" 
+                                                        class="btn btn-outline-success approve-btn" 
+                                                        data-report-id="{{ report.id }}"
+                                                        title="Approve Report">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No reports have been reviewed yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Review Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reviewForm" method="POST" action="{{ url_for('review_reports') }}">
+                <input type="hidden" id="reportId" name="report_id">
+                <input type="hidden" id="actionType" name="action">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="feedback" class="form-label">Feedback</label>
+                        <textarea class="form-control" id="feedback" name="feedback" rows="5" 
+                                  placeholder="Provide constructive feedback for the intern..."></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifyIntern" name="notify_intern" checked>
+                        <label class="form-check-label" for="notifyIntern">
+                            Notify intern via email
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle approve/decline buttons
+        document.querySelectorAll('.approve-btn, .decline-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const reportId = this.getAttribute('data-report-id');
+                const action = this.classList.contains('approve-btn') ? 'approve' : 'decline';
+                
+                document.getElementById('reportId').value = reportId;
+                document.getElementById('actionType').value = action;
+                
+                // Update modal title based on action
+                const modalTitle = document.querySelector('#reviewModal .modal-title');
+                modalTitle.textContent = action === 'approve' ? 'Approve Report' : 'Decline Report';
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+                modal.show();
+            });
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

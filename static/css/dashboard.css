@@ -1,0 +1,276 @@
+/* Dashboard Specific Styles */
+.dashboard-header {
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.dashboard-header p {
+    color: var(--gray);
+}
+
+.stat-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: white;
+    font-size: 24px;
+}
+
+.stat-card h5 {
+    color: var(--gray);
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.stat-card h2 {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.stat-card p {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* Activity Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--primary);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    border: 2px solid white;
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: var(--gray);
+}
+
+.timeline-content {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 20px;
+    }
+    
+    .content-wrapper {
+        margin-left: 0;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.collapsed {
+        transform: translateX(0);
+    }
+}
+/* Dashboard Specific Styles */
+.dashboard-header {
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.dashboard-header p {
+    color: var(--gray);
+}
+
+.stat-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: white;
+    font-size: 24px;
+}
+
+.stat-card h5 {
+    color: var(--gray);
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.stat-card h2 {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.stat-card p {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* Attendance Specific */
+.attendance-status {
+    padding: 20px 0;
+}
+
+.status-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    font-size: 32px;
+}
+
+.attendance-stats {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stat-item h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.stat-item p {
+    color: var(--gray);
+    font-size: 14px;
+}
+
+/* Reports Specific */
+.report-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.meta-item {
+    background: rgba(0, 0, 0, 0.03);
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.report-content {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.feedback-content {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+}
+
+/* Messages Specific */
+.table.messages-table tr.unread {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.table.messages-table tr.unread td {
+    font-weight: 500;
+}
+
+/* Task Specific */
+.task-priority-high {
+    border-left: 4px solid #dc3545;
+}
+
+.task-priority-medium {
+    border-left: 4px solid #fd7e14;
+}
+
+.task-priority-low {
+    border-left: 4px solid #28a745;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .report-meta {
+        grid-template-columns: 1fr;
+    }
+    
+    .attendance-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        margin-bottom: 20px;
+    }
+    
+    .content-wrapper {
+        margin-left: 0;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.collapsed {
+        transform: translateX(0);
+    }
+}

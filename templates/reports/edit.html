@@ -1,0 +1,73 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Report - {{ report.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Edit Report: {{ report.title }}</h1>
+    <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Cancel
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('edit_report', report_id=report.id) }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Report Title</label>
+                <input type="text" class="form-control" name="title" value="{{ report.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Report Type</label>
+                <select class="form-select" name="report_type" required>
+                    <option value="weekly" {% if report.report_type == 'weekly' %}selected{% endif %}>Weekly Report</option>
+                    <option value="monthly" {% if report.report_type == 'monthly' %}selected{% endif %}>Monthly Report</option>
+                    <option value="final" {% if report.report_type == 'final' %}selected{% endif %}>Final Report</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Report Content</label>
+                <textarea class="form-control" name="content" rows="10" required>{{ report.content or '' }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Attachment</label>
+                {% if report.file_path %}
+                    <div class="mb-2">
+                        <i class="fas fa-paperclip"></i> Current file: 
+                        <a href="{{ url_for('download_report', report_id=report.id) }}" target="_blank">
+                            {{ report.file_path.split('/')[-1] }}
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removeAttachment">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                        <input type="hidden" name="remove_file" id="removeFileFlag" value="0">
+                    </div>
+                {% endif %}
+                <input type="file" class="form-control" name="file" accept=".pdf,.doc,.docx,.txt,.odt">
+                <small class="text-muted">Allowed formats: PDF, DOC, DOCX, TXT, ODT</small>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">Update Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle attachment removal
+        const removeBtn = document.getElementById('removeAttachment');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                const flag = document.getElementById('removeFileFlag');
+                if (confirm('Are you sure you want to remove this attachment?')) {
+                    flag.value = '1';
+                    this.parentElement.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon text-danger">
+            <i class="fas fa-ban fa-5x"></i>
+        </div>
+        <h1>403 - Forbidden</h1>
+        <p class="lead">You don't have permission to access this page.</p>
+        <p>Please contact your administrator if you believe this is an error.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-home"></i> Return to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

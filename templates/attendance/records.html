@@ -1,0 +1,129 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Attendance Records{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Attendance Records</h1>
+    <div class="btn-group">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" data-filter="all">All Records</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="present">Present Only</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="late">Late Only</a></li>
+            <li><a class="dropdown-item" href="#" data-filter="absent">Absent Only</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Time In</th>
+                        <th>Time Out</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr data-status="{{ record.status }}">
+                        <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ record.user.first_name }} {{ record.user.last_name }}</td>
+                        <td>{{ record.time_in.strftime('%I:%M %p') }}</td>
+                        <td>{{ record.time_out.strftime('%I:%M %p') if record.time_out else '-' }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if record.status == 'present' else 'warning' if record.status == 'late' else 'danger' }}">
+                                {{ record.status|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if record.time_out %}
+                                {% set duration = record.time_out.hour * 60 + record.time_out.minute - (record.time_in.hour * 60 + record.time_in.minute) %}
+                                {{ (duration // 60) }}h {{ (duration % 60) }}m
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ record.id }}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </td>
+                    </tr>
+                    
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editModal{{ record.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Attendance Record</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('update_attendance', record_id=record.id) }}">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Status</label>
+                                            <select class="form-select" name="status">
+                                                <option value="present" {% if record.status == 'present' %}selected{% endif %}>Present</option>
+                                                <option value="late" {% if record.status == 'late' %}selected{% endif %}>Late</option>
+                                                <option value="absent" {% if record.status == 'absent' %}selected{% endif %}>Absent</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Notes</label>
+                                            <textarea class="form-control" name="notes">{{ record.notes or '' }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter functionality
+        document.querySelectorAll('[data-filter]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filter = this.getAttribute('data-filter');
+                
+                document.querySelectorAll('#attendanceTable tbody tr').forEach(row => {
+                    if (filter === 'all') {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = row.getAttribute('data-status') === filter ? '' : 'none';
+                    }
+                });
+            });
+        });
+        
+        // Initialize DataTable if available
+        if (window.$ && $.fn.DataTable) {
+            $('#attendanceTable').DataTable({
+                order: [[0, 'desc']]
+            });
+        }
+    });
+</script>
+{% endblock %}
